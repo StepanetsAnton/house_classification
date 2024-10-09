@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import OrdinalEncoder
+from category_encoders import TargetEncoder
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 
@@ -39,6 +40,14 @@ X_test_encoded = pd.DataFrame(ordinal_encoder.transform(X_test[['Zip_area', 'Zip
 X_train_final = X_train[['Area', 'Lon', 'Lat']].join(X_train_encoded)
 X_test_final = X_test[['Area', 'Lon', 'Lat']].join(X_test_encoded)
 
+target_encoder = TargetEncoder(cols=['Zip_area', 'Room', 'Zip_loc'])
+target_encoder.fit(X_train, y_train)
+
+X_train_encoded = target_encoder.transform(X_train)
+X_test_encoded = target_encoder.transform(X_test)
+
+
+
 
 model = DecisionTreeClassifier(
     criterion='entropy',
@@ -49,10 +58,10 @@ model = DecisionTreeClassifier(
     random_state=3
 )
 
-model.fit(X_train_final, y_train)
+model.fit(X_train_encoded, y_train)
 
-y_pred = model.predict(X_test_final)
+y_pred = model.predict(X_test_encoded)
 
 accuracy = accuracy_score(y_test, y_pred)
 
-print(accuracy)
+print(round(accuracy, 4))
