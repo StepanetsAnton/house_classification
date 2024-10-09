@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OrdinalEncoder
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 
@@ -22,6 +23,22 @@ X_test_final = X_test[['Area', 'Lon', 'Lat']].join(X_test_transformed)
 
 X_train_final.columns = X_train_final.columns.astype(str)
 X_test_final.columns = X_test_final.columns.astype(str)
+
+
+ordinal_encoder = OrdinalEncoder()
+ordinal_encoder.fit(X_train[['Zip_area', 'Zip_loc', 'Room']])
+
+X_train_encoded = pd.DataFrame(ordinal_encoder.transform(X_train[['Zip_area', 'Zip_loc', 'Room']]),
+                               columns=['Zip_area_encoded', 'Zip_loc_encoded', 'Room_encoded'],
+                               index=X_train.index)
+
+X_test_encoded = pd.DataFrame(ordinal_encoder.transform(X_test[['Zip_area', 'Zip_loc', 'Room']]),
+                              columns=['Zip_area_encoded', 'Zip_loc_encoded', 'Room_encoded'],
+                              index=X_test.index)
+
+X_train_final = X_train[['Area', 'Lon', 'Lat']].join(X_train_encoded)
+X_test_final = X_test[['Area', 'Lon', 'Lat']].join(X_test_encoded)
+
 
 model = DecisionTreeClassifier(
     criterion='entropy',
